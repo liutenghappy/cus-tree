@@ -1,0 +1,203 @@
+let nodeIdSeed = 0;
+export const NODE_KEY = '$treeNodeId';
+
+
+export const getChildState = node => {
+    let all = true;
+    let none = true;
+    let allWithoutDisable = true;
+    for (let i = 0, j = node.length; i < j; i++) {
+        const n = node[i];
+        if (n.checked !== true || n.indeterminate) {
+            all = false;
+            if (!n.disabled) {
+                allWithoutDisable = false;
+            }
+        }
+        if (n.checked !== false || n.indeterminate) {
+            none = false;
+        }
+    }
+
+    return { all, none, allWithoutDisable, half: !all && !none };
+};
+
+export const getNodeKey = function (key, data) {
+    if (!key) return data[NODE_KEY];
+    return data[key];
+};
+
+const reInitChecked = function (node) {
+    if (node.childNodes.length === 0 || node.loading) return;
+
+    const { all, none, half } = getChildState(node.childNodes);
+    if (all) {
+        node.checked = true;
+        node.indeterminate = false;
+    } else if (half) {
+        node.checked = false;
+        node.indeterminate = true;
+    } else if (none) {
+        node.checked = false;
+        node.indeterminate = false;
+    }
+
+    const parent = node.parentNode;
+    if (!parent || parent.level === 0) return;
+
+    reInitChecked(parent);
+};
+
+export default class Node {
+    constructor(options) {
+        this.id = nodeIdSeed++;
+        this.text = null;
+        this.level = 0;
+        this.checked = false;
+        this.indeterminate = false;
+        this.data = null;
+        this.expanded = false;
+        this.parentNode = null;
+        this.childNodes = [];
+        this.isTree = true;
+
+        for (let name in options) {
+            if (options.hasOwnProperty(name)) {
+                this[name] = options[name];
+            }
+        }
+
+
+        if (this.parentNode) {
+            this.level = this.parentNode.level + 1;
+        }
+
+        const store = this.store;
+        if (!store) {
+            throw new Error('[Node]store is required!');
+        }
+        store.registerNode(this);
+
+
+        if (this.data) {
+            this.setData(this.data);
+            if (store.defaultExpandAll) {
+                this.expanded = true;
+            }
+        } else if (this.level > 0 && store.defaultExpandAll) {
+            this.expand();
+        }
+
+        if (!this.data) return;
+        const defaultExpandedKeys = store.defaultExpandedKeys;
+        const key = store.key;
+        if (key && defaultExpandedKeys && defaultExpandedKeys.indexOf(this.key) !== -1) {
+            this.expand(null, store.autoExpandParent);
+        }
+
+        if (key && store.currentNodeKey !== undefined && this.key === store.currentNodeKey) {
+            store.currentNode = this;
+            store.currentNode.isCurrent = true;
+        }
+    }
+
+    //初始化数据
+    setData(data) {
+        this.data = data;
+        this.childNodes = [];
+
+        let children;
+        if (this.level === 0 && this.data instanceof Array) {
+            children = this.data;
+        } else {
+            children = this.data.children || [];
+        }
+
+        for (let i = 0, j = children.length; i < j; i++) {
+            this.insertChild({ data: children[i] });
+        }
+    }
+
+
+    //插入节点
+    insertChild(child, index) {
+        if (!child) throw new Error('child是必需的');
+
+        if (!(child instanceof Node)) {
+            child = Object.assign(child, {
+                parentNode: this,
+                store: this.store
+            });
+            child = new Node(child);
+        }
+
+        child.level = this.level + 1;
+
+        if (typeof index === 'undefined' || index < 0) {
+            this.childNodes.push(child);
+        } else {
+            this.childNodes.splice(index, 0, child);
+        }
+
+
+    }
+
+    //设置选中
+
+    setChecked(value, deep, recursion, passValue) {
+        this.indeterminate = value === 'half';
+        this.checked = value === true;
+
+        let { all, allWithoutDisable } = getChildState(this.childNodes);
+
+        if (!this.isLeaf && (!all && allWithoutDisable)) {
+            this.checked = false;
+            value = false;
+        }
+
+        const handleDescendants = () => {
+            if (deep) {
+                const childNodes = this.childNodes;
+                for (let i = 0, j = childNodes.length; i < j; i++) {
+                    const child = childNodes[i];
+                    passValue = passValue || value !== false;
+                    const isCheck = child.disabled ? child.checked : passValue;
+                    child.setChecked(isCheck, deep, true, passValue);
+                }
+                const { half, all } = getChildState(childNodes);
+                if (!all) {
+                    this.checked = all;
+                    this.indeterminate = half;
+                }
+            }
+        };
+
+        handleDescendants();
+
+        const parent = this.parentNode;
+        if (!parent || parent.level === 0) return;
+
+        if (!recursion) {
+            reInitChecked(parent);
+        }
+    }
+
+
+    expand(callback, expandParent) {
+        const done = () => {
+            if (expandParent) {
+                let parent = this.parentNode;
+                while (parent.level > 0) {
+                    parent.expanded = true;
+                    parent = parent.parent;
+                }
+            }
+            this.expanded = true;
+            if (callback) callback();
+        };
+        done();
+    }
+
+
+
+}
