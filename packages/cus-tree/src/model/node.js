@@ -1,3 +1,4 @@
+
 let nodeIdSeed = 0;
 export const NODE_KEY = '$treeNodeId';
 
@@ -22,10 +23,6 @@ export const getChildState = node => {
     return { all, none, allWithoutDisable, half: !all && !none };
 };
 
-export const getNodeKey = function (key, data) {
-    if (!key) return data[NODE_KEY];
-    return data[key];
-};
 
 const reInitChecked = function (node) {
     if (node.childNodes.length === 0 || node.loading) return;
@@ -46,6 +43,22 @@ const reInitChecked = function (node) {
     if (!parent || parent.level === 0) return;
 
     reInitChecked(parent);
+};
+
+//自定义children,disabled,label对应的字段
+const getPropertyFromData = function (node, prop) {
+    const props = node.store.props;
+    const data = node.data || {};
+    const config = props[prop];
+
+    if (typeof config === 'function') {
+        return config(data, node);
+    } else if (typeof config === 'string') {
+        return data[config];
+    } else if (typeof config === 'undefined') {
+        const dataProp = data[prop];
+        return dataProp === undefined ? '' : dataProp;
+    }
 };
 
 export default class Node {
@@ -78,7 +91,6 @@ export default class Node {
         }
         store.registerNode(this);
 
-
         if (this.data) {
             this.setData(this.data);
             if (store.defaultExpandAll) {
@@ -99,6 +111,20 @@ export default class Node {
             store.currentNode = this;
             store.currentNode.isCurrent = true;
         }
+    }
+
+    get label() {
+        return getPropertyFromData(this, 'label');
+    }
+
+    get key() {
+        const nodeKey = this.store.key;
+        if (this.data) return this.data[nodeKey];
+        return null;
+    }
+
+    get disabled() {
+        return getPropertyFromData(this, 'disabled');
     }
 
     //初始化数据
@@ -138,19 +164,16 @@ export default class Node {
         } else {
             this.childNodes.splice(index, 0, child);
         }
-
-
     }
 
     //设置选中
-
     setChecked(value, deep, recursion, passValue) {
         this.indeterminate = value === 'half';
         this.checked = value === true;
 
         let { all, allWithoutDisable } = getChildState(this.childNodes);
 
-        if (!this.isLeaf && (!all && allWithoutDisable)) {
+        if (!all && allWithoutDisable) {
             this.checked = false;
             value = false;
         }
@@ -171,9 +194,7 @@ export default class Node {
                 }
             }
         };
-
         handleDescendants();
-
         const parent = this.parentNode;
         if (!parent || parent.level === 0) return;
 
@@ -182,14 +203,15 @@ export default class Node {
         }
     }
 
-
+    //展开
     expand(callback, expandParent) {
         const done = () => {
+            //是否展开父节点
             if (expandParent) {
                 let parent = this.parentNode;
                 while (parent.level > 0) {
                     parent.expanded = true;
-                    parent = parent.parent;
+                    parent = parent.parentNode;
                 }
             }
             this.expanded = true;
@@ -198,6 +220,8 @@ export default class Node {
         done();
     }
 
-
-
+    //折叠
+    collapse() {
+        this.expanded = false;
+    }
 }

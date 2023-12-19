@@ -1,6 +1,6 @@
 <template>
-    <div class="cus-tree-node">
-        <div @click="expend" class="cus-node-title"
+    <div class="cus-tree-node" :style="{ flex: hasChild ? '1 0 100%' : '33%' }">
+        <div @click="handleExpandIconClick" class="cus-node-title"
             :style="{ 'padding-left': index === 0 ? (node.level - 1) * 24 + 'px' : 0 }">
             <el-checkbox v-model="node.checked" :indeterminate="node.indeterminate" :disabled="!!node.disabled"
                 @click.native.stop @change="handleCheckChange"></el-checkbox>
@@ -12,9 +12,10 @@
         </div>
         <div class="cus-node-content">
             <collapse-transition>
-                <div class="content-container" v-show="expanded">
+                <div class="content-container" v-if="childNodeRendered" v-show="expanded">
                     <div>
-                        <cus-tree-node :node="child" v-for="(child,index) in node.childNodes" :key="getKey(child)" :index="index"></cus-tree-node>
+                        <cus-tree-node :node="child" v-for="(child, index) in node.childNodes" :key="getKey(child)"
+                            :index="index"></cus-tree-node>
                     </div>
                 </div>
             </collapse-transition>
@@ -24,15 +25,16 @@
 
 <script>
 export default {
-    name: 'cus-tree-node'
+    name: 'cus-tree-node',
 }
 </script>
 
 <script setup>
+import { ref, computed, onMounted, watch, nextTick, inject } from 'vue';
+import { getNodeKey } from './model/utils'
 import CollapseTransition from '@/utils/collapse-transition.js'
-import { ref, computed, onMounted } from 'vue';
-import { getNodeKey } from './model/node'
 
+const tree = inject('tree')
 const props = defineProps({
     node: {
         type: Object
@@ -41,23 +43,38 @@ const props = defineProps({
 })
 
 const expanded = ref(false)
-const tree = ref(null)
+const childNodeRendered = ref(false)//子节点是否渲染
+const oldChecked = ref(null)//上次选中的值
+const oldIndeterminate = ref(null)
 
 const data = computed(() => {
     return props.node.data
 })
 
+const hasChild = computed(() => {
+    return props.node.childNodes.length > 0
+})
+
 onMounted(() => {
-    console.log(props.node)
+    console.log(tree.value)
 
     if (props.node.expanded) {
         expanded.value = true;
+        childNodeRendered.value = true
     }
 
 })
 
-function expend() {
-    expanded.value = !expanded.value
+
+
+function handleExpandIconClick() {
+    if (expanded.value) {
+        // this.tree.$emit('node-collapse', this.node.data, this.node, this);
+        props.node.collapse();
+    } else {
+        props.node.expand();
+        // this.$emit('node-expand', this.node.data, this.node, this);
+    }
 }
 
 function getKey(node) {
@@ -76,6 +93,29 @@ function handleCheckChange(value, ev) {
     //     });
     // });
 }
+
+function handleSelectChange(checked, indeterminate) {
+    if (oldChecked.value !== checked && oldIndeterminate.value !== indeterminate) {
+        // this.tree.$emit('check-change', this.node.data, checked, indeterminate);
+    }
+    oldChecked.value = checked;
+    indeterminate.value = indeterminate;
+}
+
+watch(() => props.node.expanded, (val) => {
+    nextTick(() => expanded.value = val);
+    if (val) {
+        childNodeRendered.value = true;
+    }
+})
+
+watch(() => props.node.checked, (val) => {
+    handleSelectChange(val, props.node.indeterminate);
+})
+
+watch(() => props.node.indeterminate, (val) => {
+    handleSelectChange(props.node.checked, val);
+})
 </script>
 
 <style lang="scss" scoped>

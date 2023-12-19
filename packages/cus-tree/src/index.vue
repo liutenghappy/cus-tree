@@ -7,14 +7,16 @@
 
 <script>
 export default {
-    name: "cus-tree"
+    name: "cus-tree",
 }
 </script>
 
 <script setup>
-import { ref, onMounted, watch, provide } from 'vue'
+import { ref, onMounted, watch, getCurrentInstance, provide } from 'vue'
 import TreeStore from './model/tree-store'
 import cusTreeNode from './cus-tree-node.vue';
+const tree = getCurrentInstance();
+provide('tree', ref(tree.proxy))
 const props = defineProps({
     data: {
         type: Array,
@@ -29,6 +31,15 @@ const props = defineProps({
         default: true
     },
     defaultExpandAll: Boolean,//是否默认展开所有节点
+    props: {
+        default() {
+            return {
+                children: 'children',
+                label: 'label',
+                disabled: 'disabled'
+            };
+        }
+    }
 })
 
 const store = ref({})
@@ -38,18 +49,27 @@ onMounted(() => {
     store.value = new TreeStore({
         key: props.nodeKey,
         data: props.data,
+        props: props.props,
         currentNodeKey: props.currentNodeKey,
         defaultCheckedKeys: props.defaultCheckedKeys,
         defaultExpandedKeys: props.defaultExpandedKeys,
         autoExpandParent: props.autoExpandParent,
         defaultExpandAll: props.defaultExpandAll,
     });
-
     root.value = store.value.root;
 })
 
-watch(() => props.data, () => {
+watch(() => props.data, (newVal) => {
     store.value.setData(newVal);
+})
+
+watch(() => props.defaultCheckedKeys, (newVal) => {
+    store.value.setDefaultCheckedKey(newVal);
+})
+
+watch(() => props.defaultExpandedKeys, (newVal) => {
+    store.value.defaultExpandedKeys = newVal;
+    store.value.setDefaultExpandedKeys(newVal);
 })
 
 
@@ -60,5 +80,7 @@ watch(() => props.data, () => {
 <style lang="scss" scoped>
 .cus-tree {
     font-size: 16px;
+    display: flex;
+    flex-wrap: wrap;
 }
 </style>

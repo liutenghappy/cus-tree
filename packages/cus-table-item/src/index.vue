@@ -10,7 +10,8 @@
             <collapse-transition>
                 <div class="content-container" v-show="isExpend">
                     <div>
-                        <cus-tree :data="TreeData"></cus-tree>
+                        <cus-tree node-key="id" :data="TreeData" :default-expanded-keys="[1,6]"
+                            :default-checked-keys="[1, 2, 11]"></cus-tree>
                     </div>
                 </div>
             </collapse-transition>
@@ -47,6 +48,8 @@ const TreeData = ref([{
     children: [{
         id: 2,
         label: '产品介绍',
+        disabled: true,
+        checked: true
     }, {
         id: 3,
         label: '签约',
@@ -55,22 +58,33 @@ const TreeData = ref([{
         label: '查询',
     }]
 }, {
-    id: 2,
+    id: 5,
     label: '第二个分类',
     children: [{
-        id: 5,
+        id: 6,
         label: '第三层级',
         children: [{
-            id: 2,
+            id: 7,
             label: '产品介绍',
         }, {
-            id: 3,
+            id: 8,
             label: '签约',
         }, {
-            id: 4,
+            id: 9,
             label: '查询',
         }]
     }]
+}, {
+    id: 10,
+    label: "账户查询"
+},
+{
+    id: 11,
+    label: "交易明细"
+},
+{
+    id: 12,
+    label: "银企对账"
 }])
 
 function expend() {
