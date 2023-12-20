@@ -1,6 +1,6 @@
 <template>
     <div class="cus-tree">
-        <cus-tree-node v-for="(child, index) of root?.childNodes" :node="child" :index="index"
+        <cus-tree-node :show-checkbox="showCheckbox" v-for="(child, index) of root?.childNodes" :node="child" :index="index"
             :key="child[nodeKey]"></cus-tree-node>
     </div>
 </template>
@@ -22,15 +22,21 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
-    nodeKey: String,//每个树节点用来作为唯一标识的属性，整棵树应该是唯一的
-    currentNodeKey: [String, Number],//当前选中的节点
-    defaultCheckedKeys: Array,//默认勾选的节点的 key 的数组
-    defaultExpandedKeys: Array,//默认展开的节点的 key 的数组
-    autoExpandParent: {//展开子节点的时候是否自动展开父节点
+    //每个树节点用来作为唯一标识的属性，整棵树应该是唯一的
+    nodeKey: String,
+    //当前选中的节点
+    currentNodeKey: [String, Number],
+    //默认勾选的节点的 key 的数组
+    defaultCheckedKeys: Array,
+    //默认展开的节点的 key 的数组
+    defaultExpandedKeys: Array,
+    //展开子节点的时候是否自动展开父节点
+    autoExpandParent: {
         type: Boolean,
         default: true
     },
-    defaultExpandAll: Boolean,//是否默认展开所有节点
+    //是否默认展开所有节点
+    defaultExpandAll: Boolean,
     props: {
         default() {
             return {
@@ -39,7 +45,17 @@ const props = defineProps({
                 disabled: 'disabled'
             };
         }
-    }
+    },
+    //子节点的缩进
+    indent: {
+        type: Number,
+        default: 24
+    },
+    //是否可选
+    showCheckbox: {
+        type: Boolean,
+        default: false
+    },
 })
 
 const store = ref({})
@@ -59,6 +75,14 @@ onMounted(() => {
     root.value = store.value.root;
 })
 
+//全选
+function setAllChecked(checked) {
+    root.value.childNodes.forEach((child) => {
+        child.setChecked(checked, true)
+    })
+}
+
+
 watch(() => props.data, (newVal) => {
     store.value.setData(newVal);
 })
@@ -72,7 +96,11 @@ watch(() => props.defaultExpandedKeys, (newVal) => {
     store.value.setDefaultExpandedKeys(newVal);
 })
 
-
+//暴露setup内的方法和属性
+defineExpose({
+    root,
+    setAllChecked
+})
 
 </script>
 

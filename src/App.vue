@@ -1,12 +1,12 @@
 <template>
   <div>
-    <CusTableItem :data="data"></CusTableItem>
+    <CusTableItem  :show-checkbox="showCheckbox" @check="check" :data="data"></CusTableItem>
   </div>
 </template>
 
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import CusTableItem from '../packages/cus-table-item';
 
 const data = reactive({
@@ -32,6 +32,11 @@ const data = reactive({
     }
   ]
 })
+const showCheckbox = ref(true)
+
+function check(obj) {
+  console.log(obj)
+}
 
 
 </script>

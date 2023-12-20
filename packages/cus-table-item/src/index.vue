@@ -1,7 +1,7 @@
 <template>
     <div class="cus-table">
         <div @click="expend" class="cus-table-header">
-            <el-checkbox v-model="checked"></el-checkbox>
+            <el-checkbox v-if="showCheckbox" :indeterminate="isIndeterminate" v-model="checked"></el-checkbox>
             <span class="title">{{ data.title }}</span>
             <i v-if="isExpend" class="el-icon-arrow-down"></i>
             <i v-else class="el-icon-arrow-up"></i>
@@ -10,8 +10,9 @@
             <collapse-transition>
                 <div class="content-container" v-show="isExpend">
                     <div>
-                        <cus-tree node-key="id" :data="TreeData" :default-expanded-keys="[1,6]"
-                            :default-checked-keys="[1, 2, 11]"></cus-tree>
+                        <cus-tree ref="tree" :show-checkbox="showCheckbox" @node-collapse="nodeCollapse"
+                            @node-expand="nodeExpand" @node-click="nodeClick" @check="check" node-key="id" :data="TreeData"
+                            :default-expanded-keys="defaultExpanded" :default-checked-keys="defaultChecked"></cus-tree>
                     </div>
                 </div>
             </collapse-transition>
@@ -26,7 +27,7 @@ export default {
 </script>
 
 <script  setup>
-import { ref } from 'vue'
+import { ref, watch, nextTick, computed, onMounted } from 'vue'
 import CollapseTransition from '@/utils/collapse-transition.js'
 import CusTree from '../../cus-tree';
 const props = defineProps({
@@ -38,8 +39,14 @@ const props = defineProps({
     },
     name: {
         type: [String, Number]
+    },
+    showCheckbox: {
+        type: Boolean,
+        default: false
     }
 })
+const $emit = defineEmits(['selected'])
+const tree = ref(null)
 const checked = ref(true)
 const isExpend = ref(true)
 const TreeData = ref([{
@@ -53,6 +60,7 @@ const TreeData = ref([{
     }, {
         id: 3,
         label: '签约',
+        new: true
     }, {
         id: 4,
         label: '查询',
@@ -72,6 +80,10 @@ const TreeData = ref([{
         }, {
             id: 9,
             label: '查询',
+        },
+        {
+            id: 14,
+            label: '单笔转账',
         }]
     }]
 }, {
@@ -85,11 +97,82 @@ const TreeData = ref([{
 {
     id: 12,
     label: "银企对账"
+},
+{
+    id: 13,
+    label: "限额管理"
 }])
+const defaultChecked = ref([1, 2, 11])
+const defaultExpanded = ref([1, 6])
+const isIndeterminate = ref(false)
 
+// const isIndeterminate = computed(() => {
+//     return  
+
+// })
+
+onMounted(() => {
+    nextTick(() => {
+        handleIndeterminate()
+    })
+})
+
+//判断是否半选
+function handleIndeterminate() {
+    const count = tree.value.root.store.count;
+    const keys = tree.value.root.store.getCheckedKeys();
+    isIndeterminate.value = keys.length > 0 && keys.length < count ? true : false
+}
+
+
+//展开
 function expend() {
     isExpend.value = !isExpend.value
 }
+
+function setAllChecked(val) {
+    tree.value.setAllChecked(val)
+    let allResult = tree.value.root.store.getCheckedKeys()
+    let halfResult = tree.value.root.store.getHalfCheckedKeys()
+    $emit('check', {
+        checkedKeys: allResult,
+        halfCheckedKeys: halfResult
+    })
+}
+
+
+//选中事件
+function check(data, state) {
+    $emit('check', {
+        checkedKeys: state.checkedKeys,
+        halfCheckedKeys: state.halfCheckedKeys
+    })
+    handleIndeterminate()
+}
+//点击事件
+function nodeClick(data, node) {
+    console.log('点击事件', data, node)
+}
+
+//节点展开事件
+function nodeExpand(data, node, instance) {
+    console.log('节点展开事件', data, node, instance)
+}
+//节点折叠事件
+function nodeCollapse(data, node, instance) {
+    console.log('节点折叠事件', data, node, instance)
+}
+
+
+watch(checked, (val) => {
+    nextTick(() => {
+        setAllChecked(val)
+        handleIndeterminate()
+    })
+}, {
+    immediate: true
+})
+
 
 </script>
 

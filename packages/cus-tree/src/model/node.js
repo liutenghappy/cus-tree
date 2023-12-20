@@ -72,7 +72,10 @@ export default class Node {
         this.expanded = false;
         this.parentNode = null;
         this.childNodes = [];
-        this.isTree = true;
+        //是否为叶子节点
+        this.isLeaf = false;
+        //是否为当前节点
+        this.isCurrent = false;
 
         for (let name in options) {
             if (options.hasOwnProperty(name)) {
@@ -139,6 +142,10 @@ export default class Node {
             children = this.data.children || [];
         }
 
+        if (children.length === 0) {
+            this.isLeaf = true
+        }
+
         for (let i = 0, j = children.length; i < j; i++) {
             this.insertChild({ data: children[i] });
         }
@@ -157,6 +164,8 @@ export default class Node {
             child = new Node(child);
         }
 
+        this.store.count += 1
+
         child.level = this.level + 1;
 
         if (typeof index === 'undefined' || index < 0) {
@@ -168,8 +177,10 @@ export default class Node {
 
     //设置选中
     setChecked(value, deep, recursion, passValue) {
+        // console.log(this)
         this.indeterminate = value === 'half';
         this.checked = value === true;
+
 
         let { all, allWithoutDisable } = getChildState(this.childNodes);
 

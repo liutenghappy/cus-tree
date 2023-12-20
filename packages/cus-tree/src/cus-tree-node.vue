@@ -1,21 +1,22 @@
 <template>
-    <div class="cus-tree-node" :style="{ flex: hasChild ? '1 0 100%' : '33%' }">
-        <div @click="handleExpandIconClick" class="cus-node-title"
-            :style="{ 'padding-left': index === 0 ? (node.level - 1) * 24 + 'px' : 0 }">
-            <el-checkbox v-model="node.checked" :indeterminate="node.indeterminate" :disabled="!!node.disabled"
-                @click.native.stop @change="handleCheckChange"></el-checkbox>
+    <div @click.stop="handleClick" class="cus-tree-node" :style="{ flex: hasChild ? '1 0 100%' : '33%' }">
+        <div @click="handleExpandClick" class="cus-node-title"
+            :style="{ 'padding-left': index % 3 === 0 ? (node.level - 1) * tree.indent + 'px' : 0 }">
+            <el-checkbox v-if="showCheckbox" v-model="node.checked" :indeterminate="node.indeterminate"
+                :disabled="!!node.disabled" @click.native.stop @change="handleCheckChange"></el-checkbox>
             <span class="title">{{ data.label }}</span>
             <template v-if="node.childNodes.length > 0">
                 <i v-if="expanded" class="el-icon-arrow-down"></i>
                 <i v-else class="el-icon-arrow-up"></i>
             </template>
+            <img v-if="data.new" class="new" src="./img/new.png" alt="">
         </div>
         <div class="cus-node-content">
             <collapse-transition>
                 <div class="content-container" v-if="childNodeRendered" v-show="expanded">
                     <div>
-                        <cus-tree-node :node="child" v-for="(child, index) in node.childNodes" :key="getKey(child)"
-                            :index="index"></cus-tree-node>
+                        <cus-tree-node :show-checkbox="showCheckbox" :node="child" v-for="(child, index) in node.childNodes"
+                            :key="getKey(child)" :index="index"></cus-tree-node>
                     </div>
                 </div>
             </collapse-transition>
@@ -30,14 +31,20 @@ export default {
 </script>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick, inject } from 'vue';
+import { ref, computed, onMounted, watch, nextTick, inject, getCurrentInstance } from 'vue';
 import { getNodeKey } from './model/utils'
 import CollapseTransition from '@/utils/collapse-transition.js'
 
+//注入父级树组件
 const tree = inject('tree')
+const nodeInstance = ref(getCurrentInstance().proxy);
 const props = defineProps({
     node: {
         type: Object
+    },
+    showCheckbox: {
+        type: Boolean,
+        default: false
     },
     index: Number
 })
@@ -56,7 +63,7 @@ const hasChild = computed(() => {
 })
 
 onMounted(() => {
-    console.log(tree.value)
+    // console.log(tree.value)
 
     if (props.node.expanded) {
         expanded.value = true;
@@ -66,40 +73,50 @@ onMounted(() => {
 })
 
 
-
-function handleExpandIconClick() {
+//处理展开事件
+function handleExpandClick() {
+    if (props.node.isLeaf) return;
     if (expanded.value) {
-        // this.tree.$emit('node-collapse', this.node.data, this.node, this);
+        tree.value.$emit('node-collapse', props.node.data, props.node, nodeInstance.value);
         props.node.collapse();
     } else {
         props.node.expand();
-        // this.$emit('node-expand', this.node.data, this.node, this);
+        tree.value.$emit('node-expand', props.node.data, props.node, nodeInstance.value);
     }
+}
+
+//处理点击事件
+function handleClick() {
+    const store = props.node.store;
+    store.setCurrentNode(props.node);
+    // tree.value.$emit('current-change', store.currentNode ? store.currentNode.data : null, store.currentNode);
+    tree.value.$emit('node-click', props.node.data, props.node, nodeInstance.value);
 }
 
 function getKey(node) {
     return getNodeKey(node.store.key, node.data);
 }
 
+//处理选中事件
 function handleCheckChange(value, ev) {
     props.node.setChecked(ev.target.checked, true);
-    // this.$nextTick(() => {
-    //     const store = this.tree.store;
-    //     this.tree.$emit('check', this.node.data, {
-    //         checkedNodes: store.getCheckedNodes(),
-    //         checkedKeys: store.getCheckedKeys(),
-    //         halfCheckedNodes: store.getHalfCheckedNodes(),
-    //         halfCheckedKeys: store.getHalfCheckedKeys(),
-    //     });
-    // });
+    nextTick(() => {
+        const store = props.node.store;
+        tree.value.$emit('check', props.node.data, {
+            checkedNodes: store.getCheckedNodes(),
+            checkedKeys: store.getCheckedKeys(),
+            halfCheckedNodes: store.getHalfCheckedNodes(),
+            halfCheckedKeys: store.getHalfCheckedKeys(),
+        });
+    })
 }
 
 function handleSelectChange(checked, indeterminate) {
     if (oldChecked.value !== checked && oldIndeterminate.value !== indeterminate) {
-        // this.tree.$emit('check-change', this.node.data, checked, indeterminate);
+        tree.value.$emit('check-change', props.node.data, checked, indeterminate);
     }
     oldChecked.value = checked;
-    indeterminate.value = indeterminate;
+    oldIndeterminate.value = indeterminate;
 }
 
 watch(() => props.node.expanded, (val) => {
@@ -123,6 +140,11 @@ watch(() => props.node.indeterminate, (val) => {
     font-size: 16px;
     flex-basis: 100%;
 
+    .new {
+        width: 32px;
+        margin-left: 10px;
+    }
+
     .cus-node-title {
         display: flex;
         align-items: center;
@@ -139,6 +161,7 @@ watch(() => props.node.indeterminate, (val) => {
         .content-container {
             &>div {
                 display: flex;
+                flex-wrap: wrap;
 
             }
         }
