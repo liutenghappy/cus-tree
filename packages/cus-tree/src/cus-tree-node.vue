@@ -1,10 +1,10 @@
 <template>
-    <div @click.stop="handleClick" class="cus-tree-node" :style="{ flex: hasChild ? '1 0 100%' : '33%' }">
+    <div @click.stop="handleClick" class="cus-tree-node" :style="{ flex: hasChild ? '1 0 100%' : '0 0 33%' }">
         <div @click="handleExpandClick" class="cus-node-title"
             :style="{ 'padding-left': index % 3 === 0 ? (node.level - 1) * tree.indent + 'px' : 0 }">
             <el-checkbox v-if="showCheckbox" v-model="node.checked" :indeterminate="node.indeterminate"
                 :disabled="!!node.disabled" @click.native.stop @change="handleCheckChange"></el-checkbox>
-            <span class="title">{{ data.label }}</span>
+            <span class="title">{{ node.label }}</span>
             <template v-if="node.childNodes.length > 0">
                 <i v-if="expanded" class="el-icon-arrow-down"></i>
                 <i v-else class="el-icon-arrow-up"></i>
@@ -141,8 +141,8 @@ watch(() => props.node.indeterminate, (val) => {
     flex-basis: 100%;
 
     .new {
-        width: 32px;
-        margin-left: 10px;
+        width: 30px;
+        margin-left: 7px;
     }
 
     .cus-node-title {

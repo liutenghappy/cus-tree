@@ -82,6 +82,35 @@ function setAllChecked(checked) {
     })
 }
 
+//获取选中节点的key
+function getCheckedKeys(leafOnly = false) {
+    return store.value.getCheckedKeys(leafOnly)
+}
+
+//获取选中的节点
+function getCheckedNodes(leafOnly = false, includeHalfChecked = false) {
+    return store.value.getCheckedNodes(leafOnly, includeHalfChecked)
+}
+
+//获取半选中节点
+function getHalfCheckedNodes() {
+    return store.value.getHalfCheckedNodes()
+}
+
+//获取半选中节点的key
+function getHalfCheckedKeys() {
+    return store.value.getHalfCheckedKeys()
+}
+
+
+
+//选新增
+function setNewChecked(val) {
+    store.value.newNodes.forEach(node => {
+        node.setChecked(val, true)
+    })
+}
+
 
 watch(() => props.data, (newVal) => {
     store.value.setData(newVal);
@@ -99,7 +128,13 @@ watch(() => props.defaultExpandedKeys, (newVal) => {
 //暴露setup内的方法和属性
 defineExpose({
     root,
-    setAllChecked
+    store,
+    setAllChecked,
+    getCheckedKeys,
+    getCheckedNodes,
+    getHalfCheckedNodes,
+    getHalfCheckedKeys,
+    setNewChecked
 })
 
 </script>

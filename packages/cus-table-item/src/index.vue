@@ -2,7 +2,7 @@
     <div class="cus-table">
         <div @click="expend" class="cus-table-header">
             <el-checkbox v-if="showCheckbox" :indeterminate="isIndeterminate" v-model="checked"></el-checkbox>
-            <span class="title">{{ data.title }}</span>
+            <span class="title">{{ data.name }}</span>
             <i v-if="isExpend" class="el-icon-arrow-down"></i>
             <i v-else class="el-icon-arrow-up"></i>
         </div>
@@ -10,9 +10,10 @@
             <collapse-transition>
                 <div class="content-container" v-show="isExpend">
                     <div>
-                        <cus-tree ref="tree" :show-checkbox="showCheckbox" @node-collapse="nodeCollapse"
-                            @node-expand="nodeExpand" @node-click="nodeClick" @check="check" node-key="id" :data="TreeData"
-                            :default-expanded-keys="defaultExpanded" :default-checked-keys="defaultChecked"></cus-tree>
+                        <cus-tree :props="types" ref="tree" :show-checkbox="showCheckbox" @node-collapse="nodeCollapse"
+                            @node-expand="nodeExpand" @node-click="nodeClick" @check="check" node-key="id"
+                            :data="data.childList" :default-expanded-keys="defaultExpandedKeys"
+                            :default-checked-keys="defaultCheckedKeys"></cus-tree>
                     </div>
                 </div>
             </collapse-transition>
@@ -27,7 +28,7 @@ export default {
 </script>
 
 <script  setup>
-import { ref, watch, nextTick, computed, onMounted } from 'vue'
+import { ref, watch, nextTick, onMounted } from 'vue'
 import CollapseTransition from '@/utils/collapse-transition.js'
 import CusTree from '../../cus-tree';
 const props = defineProps({
@@ -37,91 +38,43 @@ const props = defineProps({
             return {}
         }
     },
-    name: {
-        type: [String, Number]
-    },
     showCheckbox: {
         type: Boolean,
         default: false
-    }
+    },
+    //默认勾选的节点的 key 的数组
+    defaultCheckedKeys: Array,
+    //默认展开的节点的 key 的数组
+    defaultExpandedKeys: Array,
 })
-const $emit = defineEmits(['selected'])
+const $emit = defineEmits(['check'])
 const tree = ref(null)
-const checked = ref(true)
-const isExpend = ref(true)
-const TreeData = ref([{
-    id: 1,
-    label: '一个理财产品的分类',
-    children: [{
-        id: 2,
-        label: '产品介绍',
-        disabled: true,
-        checked: true
-    }, {
-        id: 3,
-        label: '签约',
-        new: true
-    }, {
-        id: 4,
-        label: '查询',
-    }]
-}, {
-    id: 5,
-    label: '第二个分类',
-    children: [{
-        id: 6,
-        label: '第三层级',
-        children: [{
-            id: 7,
-            label: '产品介绍',
-        }, {
-            id: 8,
-            label: '签约',
-        }, {
-            id: 9,
-            label: '查询',
-        },
-        {
-            id: 14,
-            label: '单笔转账',
-        }]
-    }]
-}, {
-    id: 10,
-    label: "账户查询"
-},
-{
-    id: 11,
-    label: "交易明细"
-},
-{
-    id: 12,
-    label: "银企对账"
-},
-{
-    id: 13,
-    label: "限额管理"
-}])
-const defaultChecked = ref([1, 2, 11])
-const defaultExpanded = ref([1, 6])
+const checked = ref(false)
+const isExpend = ref(false)
 const isIndeterminate = ref(false)
+const childCount = ref(props.data?.childList.length || 0)
+const rendered = ref(false)
+const types = ref({
+    label: 'name',
+    children: 'childList'
+})
 
-// const isIndeterminate = computed(() => {
-//     return  
 
-// })
 
 onMounted(() => {
     nextTick(() => {
-        handleIndeterminate()
+        handleDefaultExpend()
+        handleDefaultChecked()
     })
 })
 
 //判断是否半选
 function handleIndeterminate() {
-    const count = tree.value.root.store.count;
-    const keys = tree.value.root.store.getCheckedKeys();
-    isIndeterminate.value = keys.length > 0 && keys.length < count ? true : false
+    const count = tree.value.store.count;
+    const keys = tree.value.store.getCheckedKeys();
+    if (count === keys.length) checked.value = true;
+    if (keys.length === 0) checked.value = false;
+    isIndeterminate.value = keys.length > 0 && keys.length < count ? true : false;
 }
 
 
@@ -130,15 +83,53 @@ function expend() {
     isExpend.value = !isExpend.value
 }
 
-function setAllChecked(val) {
+function checkAll(val) {
     tree.value.setAllChecked(val)
-    let allResult = tree.value.root.store.getCheckedKeys()
-    let halfResult = tree.value.root.store.getHalfCheckedKeys()
+}
+//选择新增节点
+function checkNew(val) {
+    if (props.data.new) {
+        checked.value = true
+    } else {
+        tree.value.setNewChecked(val)
+    }
+}
+
+function setAllChecked(val) {
+    checkAll(val)
+    let allResult = getCheckedKeys()
+    let halfResult = getHalfCheckedKeys()
     $emit('check', {
         checkedKeys: allResult,
         halfCheckedKeys: halfResult
     })
 }
+
+//获取选中节点的key
+function getCheckedKeys(leafOnly = false) {
+    const result = tree.value.getCheckedKeys(leafOnly);
+    const k = tree.value.store.key;
+    if (childCount.value === result.length) {
+        result.unshift(props.data[k])
+    }
+    return result
+}
+
+//获取选中的节点
+function getCheckedNodes(leafOnly = false, includeHalfChecked = false) {
+    return tree.value.getCheckedNodes(leafOnly, includeHalfChecked)
+}
+
+//获取半选中节点的key
+function getHalfCheckedKeys() {
+    return tree.value.getHalfCheckedKeys()
+}
+
+//获取半选中节点
+function getHalfCheckedNodes() {
+    return store.value.getHalfCheckedNodes()
+}
+
 
 
 //选中事件
@@ -163,6 +154,21 @@ function nodeCollapse(data, node, instance) {
     console.log('节点折叠事件', data, node, instance)
 }
 
+//处理默认展开
+function handleDefaultExpend() {
+    const keyVal = props.data.id;
+    if (props.defaultExpandedKeys.includes(keyVal)) {
+        isExpend.value = true
+    }
+}
+//默认选中
+function handleDefaultChecked() {
+    const keyVal = props.data.id;
+    if (props.defaultCheckedKeys.includes(keyVal)) {
+        checked.value = true
+    }
+}
+
 
 watch(checked, (val) => {
     nextTick(() => {
@@ -171,6 +177,28 @@ watch(checked, (val) => {
     })
 }, {
     immediate: true
+})
+
+watch(isExpend, (val) => {
+    if (val) {
+        rendered.value = true
+    }
+})
+
+
+
+watch(() => props.defaultExpandedKeys, (val) => {
+
+
+})
+
+defineExpose({
+    checked,
+    checkNew,
+    getCheckedKeys,
+    getCheckedNodes,
+    getHalfCheckedNodes,
+    getHalfCheckedKeys
 })
 
 

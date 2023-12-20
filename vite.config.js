@@ -11,6 +11,10 @@ export default defineConfig({
             {
                 find: "@",
                 replacement: "/src"
+            },
+            {
+                find: "pkg",
+                replacement: "/packages"
             }
         ]
     },

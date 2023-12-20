@@ -1,6 +1,5 @@
 
 let nodeIdSeed = 0;
-export const NODE_KEY = '$treeNodeId';
 
 
 export const getChildState = node => {
@@ -177,9 +176,8 @@ export default class Node {
 
     //设置选中
     setChecked(value, deep, recursion, passValue) {
-        // console.log(this)
         this.indeterminate = value === 'half';
-        this.checked = value === true;
+        this.checked = this.disabled ? this.checked : value === true;
 
 
         let { all, allWithoutDisable } = getChildState(this.childNodes);

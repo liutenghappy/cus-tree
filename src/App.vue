@@ -1,41 +1,48 @@
 <template>
-  <div>
-    <CusTableItem  :show-checkbox="showCheckbox" @check="check" :data="data"></CusTableItem>
+  <div class="table-page">
+    <div class="checks">
+      <el-checkbox @change="checkAll" v-model="checked1">全选所有菜单</el-checkbox>
+      <el-checkbox @change="checkNew" v-model="checked2">全选新增菜单</el-checkbox>
+      <div>
+        <button @click="getKeys">获取选中节点的key</button>
+        <span>{{ keys }}</span>
+      </div>
+    </div>
+    <cus-table :default-expanded-keys="defaultExpanded" :default-checked-keys="defaultChecked" ref="table"
+      :data="data"></cus-table>
   </div>
 </template>
 
 
 <script setup>
-import { reactive, ref } from 'vue'
-import CusTableItem from '../packages/cus-table-item';
+import { ref } from 'vue'
+import CusTable from 'pkg/cus-table'
+import treeData from '@/params.js'
 
-const data = reactive({
-  title: '理财',
-  children: [
-    {
-      id: '1',
-      label: '产品介绍',
-      new: false,
-      disabled: true
-    },
-    {
-      id: '2',
-      label: '签约',
-      new: false,
-      disabled: false
-    },
-    {
-      id: '3',
-      label: '查询',
-      new: true,
-      disabled: false
-    }
-  ]
-})
-const showCheckbox = ref(true)
+const data = ref(treeData.data.menuDTOList)
 
-function check(obj) {
-  console.log(obj)
+const checked1 = ref(false)
+const checked2 = ref(false)
+
+const table = ref(null)
+const keys = ref([])
+const defaultExpanded = ref(['2', '16', '3'])
+const defaultChecked = ref(['3','2'])
+
+
+
+
+
+function checkAll(val) {
+  table.value.checkAll(val)
+}
+
+function checkNew(val) {
+  table.value.checkNew(val)
+}
+
+function getKeys() {
+  keys.value = table.value.getCheckedKeys()
 }
 
 
@@ -43,4 +50,10 @@ function check(obj) {
 
 
 
-<style scoped></style>
+<style lang="scss" scoped>
+.table-page {
+  .checks {
+    margin-bottom: 10px;
+  }
+}
+</style>

@@ -1,7 +1,7 @@
-import CusTable from './src/index.vue'
+import CusTableItem from './src/index.vue'
 
-CusTable.install = function (Vue) {
-    Vue.component(CusTable.name, CusTable);
+CusTableItem.install = function (Vue) {
+    Vue.component(CusTableItem.name, CusTableItem);
 }
 
-export default CusTable
+export default CusTableItem

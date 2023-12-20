@@ -18,6 +18,8 @@ export default class TreeStore {
 
         //设置node-key后，收集所有节点，用于默认展开和默认选中
         this.nodesMap = {};
+        //新增节点
+        this.newNodes = []
 
         this.root = new Node({
             data: this.data,
@@ -63,6 +65,7 @@ export default class TreeStore {
         if (!key || !node || !node.data) return;
 
         const nodeKey = node.key;
+        if(node.data.new) this.newNodes.push(node)
         if (nodeKey !== undefined) this.nodesMap[node.key] = node;
     }
 
@@ -153,4 +156,6 @@ export default class TreeStore {
         this.currentNode = currentNode;
         this.currentNode.isCurrent = true;
     }
+
+
 }
