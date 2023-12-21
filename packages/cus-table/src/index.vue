@@ -67,11 +67,21 @@ function checkNew(val) {
     });
 }
 
+//获取所有节点
+function getAllNodesMap() {
+    let result = {}
+    tableItems.value.forEach(item => {
+        result = Object.assign(result, item.getAllNodesMap())
+    });
+    return result
+}
+
 defineExpose({
     checkAll,
     checkNew,
     getCheckedKeys,
-    getCheckedNodes
+    getCheckedNodes,
+    getAllNodesMap
 })
 
 </script>
@@ -79,7 +89,7 @@ defineExpose({
 <style lang="scss" scoped>
 .cus-table {
     &>div {
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
 }
 </style>

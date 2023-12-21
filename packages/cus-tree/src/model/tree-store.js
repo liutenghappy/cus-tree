@@ -65,7 +65,7 @@ export default class TreeStore {
         if (!key || !node || !node.data) return;
 
         const nodeKey = node.key;
-        if(node.data.new) this.newNodes.push(node)
+        if (node.data.new) this.newNodes.push(node)
         if (nodeKey !== undefined) this.nodesMap[node.key] = node;
     }
 
@@ -155,6 +155,74 @@ export default class TreeStore {
         }
         this.currentNode = currentNode;
         this.currentNode.isCurrent = true;
+    }
+
+    //设置选中的节点(value为true选中，为false不选中)
+    setCheckedKeys(keys, value = true, leafOnly = false) {
+        this.defaultCheckedKeys = keys;
+        const key = this.key;
+        const checkedKeys = {};
+        keys.forEach((key) => {
+            checkedKeys[key] = true;
+        });
+
+        this._setCheckedKeys(key, value, leafOnly, checkedKeys);
+    }
+
+    //获取所有节点
+    _getAllNodes() {
+        const allNodes = [];
+        const nodesMap = this.nodesMap;
+        for (let nodeKey in nodesMap) {
+            if (nodesMap.hasOwnProperty(nodeKey)) {
+                allNodes.push(nodesMap[nodeKey]);
+            }
+        }
+        return allNodes;
+    }
+
+    _setCheckedKeys(key, value, leafOnly = false, checkedKeys) {
+        const allNodes = this._getAllNodes().sort((a, b) => b.level - a.level);
+        const cache = Object.create(null);
+        const keys = Object.keys(checkedKeys);
+        allNodes.forEach(node => node.setChecked(false, false));
+        for (let i = 0, j = allNodes.length; i < j; i++) {
+            const node = allNodes[i];
+            const nodeKey = node.data[key].toString();
+            let checked = keys.indexOf(nodeKey) > -1;
+            if (!checked && value) {
+                if (node.checked && !cache[nodeKey]) {
+                    node.setChecked(false, false);
+                }
+                continue;
+            }
+
+            let parent = node.parentNode;
+            while (parent && parent.level > 0) {
+                cache[parent.data[key]] = true;
+                parent = parent.parentNode;
+            }
+
+            if (node.isLeaf) {
+                node.setChecked(value, false);
+                continue;
+            }
+            node.setChecked(value, true);
+
+            if (leafOnly) {
+                node.setChecked(false, false);
+                const traverse = function (node) {
+                    const childNodes = node.childNodes;
+                    childNodes.forEach((child) => {
+                        if (!child.isLeaf) {
+                            child.setChecked(false, false);
+                        }
+                        traverse(child);
+                    });
+                };
+                traverse(node);
+            }
+        }
     }
 
 

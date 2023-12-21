@@ -1,7 +1,7 @@
 <template>
-    <div @click.stop="handleClick" class="cus-tree-node" :style="{ flex: hasChild ? '1 0 100%' : '0 0 33%' }">
+    <div @click.stop="handleClick" class="cus-tree-node" :style="leafStyle">
         <div @click="handleExpandClick" class="cus-node-title"
-            :style="{ 'padding-left': index % 3 === 0 ? (node.level - 1) * tree.indent + 'px' : 0 }">
+            :style="{ 'padding-left': index % tree.lineNum === 0 ? (node.level - 1) * tree.indent + 'px' : 0 }">
             <el-checkbox v-if="showCheckbox" v-model="node.checked" :indeterminate="node.indeterminate"
                 :disabled="!!node.disabled" @click.native.stop @change="handleCheckChange"></el-checkbox>
             <span class="title">{{ node.label }}</span>
@@ -15,8 +15,8 @@
             <collapse-transition>
                 <div class="content-container" v-if="childNodeRendered" v-show="expanded">
                     <div>
-                        <cus-tree-node :show-checkbox="showCheckbox" :node="child" v-for="(child, index) in node.childNodes"
-                            :key="getKey(child)" :index="index"></cus-tree-node>
+                        <cus-tree-node :line-num="lineNum" :show-checkbox="showCheckbox" :node="child"
+                            v-for="(child, index) in node.childNodes" :key="getKey(child)" :index="index"></cus-tree-node>
                     </div>
                 </div>
             </collapse-transition>
@@ -46,7 +46,12 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
-    index: Number
+    index: Number,
+    //叶子节点横排数
+    lineNum: {
+        type: Number,
+        default: 3
+    }
 })
 
 const expanded = ref(false)
@@ -58,18 +63,24 @@ const data = computed(() => {
     return props.node.data
 })
 
-const hasChild = computed(() => {
-    return props.node.childNodes.length > 0
+const leafStyle = computed(() => {
+    const base = Math.floor(100 / props.lineNum);
+    if (!props.node.isLeaf) {
+        return {
+            flex: '1 0 100%'
+        }
+    } else {
+        return {
+            flex: `0 0 ${base}%`
+        }
+    }
 })
 
 onMounted(() => {
-    // console.log(tree.value)
-
     if (props.node.expanded) {
         expanded.value = true;
         childNodeRendered.value = true
     }
-
 })
 
 
@@ -111,6 +122,7 @@ function handleCheckChange(value, ev) {
     })
 }
 
+//节点选中状态发生变化时
 function handleSelectChange(checked, indeterminate) {
     if (oldChecked.value !== checked && oldIndeterminate.value !== indeterminate) {
         tree.value.$emit('check-change', props.node.data, checked, indeterminate);
