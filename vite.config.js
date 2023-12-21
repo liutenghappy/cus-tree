@@ -1,16 +1,21 @@
 import { defineConfig } from "vite"
-import vue from "@vitejs/plugin-vue2"
-import { resolve } from 'node:path'
+import { createVuePlugin } from "vite-plugin-vue2";
 
 export default defineConfig({
     plugins: [
-        vue(),
+        createVuePlugin({
+            vueTemplateOptions: {},
+        }),
     ],
     resolve: {
         alias: [
             {
                 find: "@",
                 replacement: "/src"
+            },
+            {
+                find: "sty",
+                replacement: "/src/styles"
             },
             {
                 find: "pkg",
@@ -21,11 +26,11 @@ export default defineConfig({
     build: {
         rollupOptions: {
             input: {
-                component: resolve(__dirname, 'index.html')
+                component: './index.html'
             }
         }
     },
-    server:{
-        port:4444
+    server: {
+        port: 4444
     }
 })
