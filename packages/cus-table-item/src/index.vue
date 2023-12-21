@@ -10,9 +10,9 @@
             <collapse-transition>
                 <div class="content-container" v-show="isExpend">
                     <div>
-                        <cus-tree :props="types" ref="tree" :show-checkbox="showCheckbox" @node-collapse="nodeCollapse"
-                            @node-expand="nodeExpand" @node-click="nodeClick" @check="check" node-key="id"
-                            :data="data.childList" :default-expanded-keys="defaultExpandedKeys"
+                        <cus-tree :line-num="4" :props="types" ref="tree" :show-checkbox="showCheckbox"
+                            @node-collapse="nodeCollapse" @node-expand="nodeExpand" @node-click="nodeClick" @check="check"
+                            node-key="id" :data="data.childList" :default-expanded-keys="defaultExpandedKeys"
                             :default-checked-keys="defaultCheckedKeys"></cus-tree>
                     </div>
                 </div>
@@ -46,6 +46,10 @@ const props = defineProps({
     defaultCheckedKeys: Array,
     //默认展开的节点的 key 的数组
     defaultExpandedKeys: Array,
+    autoExpandParent: {
+        type: Boolean,
+        default: true
+    },
 })
 const $emit = defineEmits(['check'])
 const tree = ref(null)
@@ -59,14 +63,13 @@ const types = ref({
     children: 'childList'
 })
 
-
-
 onMounted(() => {
     nextTick(() => {
         handleDefaultExpend()
         handleDefaultChecked()
     })
 })
+
 
 //判断是否半选
 function handleIndeterminate() {
@@ -127,7 +130,7 @@ function getHalfCheckedKeys() {
 
 //获取半选中节点
 function getHalfCheckedNodes() {
-    return store.value.getHalfCheckedNodes()
+    return tree.value.getHalfCheckedNodes()
 }
 
 
@@ -169,6 +172,11 @@ function handleDefaultChecked() {
     }
 }
 
+//获取所有节点
+function getAllNodesMap() {
+    return tree.value.store.nodesMap
+}
+
 
 watch(checked, (val) => {
     nextTick(() => {
@@ -185,11 +193,12 @@ watch(isExpend, (val) => {
     }
 })
 
+watch(() => props.defaultExpandedKeys, () => {
+    handleDefaultExpend()
+})
 
-
-watch(() => props.defaultExpandedKeys, (val) => {
-
-
+watch(() => props.defaultCheckedKeys, () => {
+    handleDefaultChecked()
 })
 
 defineExpose({
@@ -198,7 +207,8 @@ defineExpose({
     getCheckedKeys,
     getCheckedNodes,
     getHalfCheckedNodes,
-    getHalfCheckedKeys
+    getHalfCheckedKeys,
+    getAllNodesMap
 })
 
 

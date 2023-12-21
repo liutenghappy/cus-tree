@@ -1,7 +1,7 @@
 <template>
     <div class="cus-tree">
-        <cus-tree-node :show-checkbox="showCheckbox" v-for="(child, index) of root?.childNodes" :node="child" :index="index"
-            :key="child[nodeKey]"></cus-tree-node>
+        <cus-tree-node :line-num="lineNum" :show-checkbox="showCheckbox" v-for="(child, index) of root?.childNodes"
+            :node="child" :index="index" :key="child[nodeKey]"></cus-tree-node>
     </div>
 </template>
 
@@ -56,6 +56,11 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
+    //叶子节点横排数
+    lineNum: {
+        type: Number,
+        default: 3
+    }
 })
 
 const store = ref({})
@@ -104,11 +109,19 @@ function getHalfCheckedKeys() {
 
 
 
-//选新增
+//选中或取消新增节点
 function setNewChecked(val) {
-    store.value.newNodes.forEach(node => {
-        node.setChecked(val, true)
+    if (!props.nodeKey) throw new Error('[Tree] nodeKey 是必须的');
+    const keys = store.value.newNodes.map(node => {
+        return node.data[props.nodeKey]
     })
+    setCheckedKeys(keys, val)
+}
+
+//设置选中的节点（根据传入的key）
+function setCheckedKeys(keys, value = true, leafOnly = false) {
+    if (!props.nodeKey) throw new Error('[Tree] nodeKey 是必须的');
+    store.value.setCheckedKeys(keys, value, leafOnly);
 }
 
 
@@ -134,7 +147,8 @@ defineExpose({
     getCheckedNodes,
     getHalfCheckedNodes,
     getHalfCheckedKeys,
-    setNewChecked
+    setNewChecked,
+    setCheckedKeys
 })
 
 </script>

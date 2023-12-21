@@ -1,10 +1,11 @@
 import Vue from 'vue'
 import App from './App.vue'
-import { Checkbox, Tree } from 'element-ui'
+import { Checkbox, Tree, CheckboxGroup } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css';
 import './index.scss'
 
 Vue.component(Checkbox.name, Checkbox);
+Vue.component(CheckboxGroup.name, CheckboxGroup);
 Vue.component(Tree.name, Tree);
 
 
