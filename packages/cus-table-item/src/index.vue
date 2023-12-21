@@ -156,17 +156,22 @@ function nodeCollapse(data, node, instance) {
 
 //处理默认展开
 function handleDefaultExpend() {
-    const keyVal = props.data.id;
+    const key = tree.value.store.key;
+    const keyVal = props.data[key];
     if (props.defaultExpandedKeys.includes(keyVal)) {
         isExpend.value = true
     }
 }
 //默认选中
 function handleDefaultChecked() {
-    const keyVal = props.data.id;
+    const key = tree.value.store.key;
+    const keyVal = props.data[key];
     if (props.defaultCheckedKeys.includes(keyVal)) {
         checked.value = true
+    } else {
+        handleIndeterminate()
     }
+
 }
 
 
@@ -175,8 +180,6 @@ watch(checked, (val) => {
         setAllChecked(val)
         handleIndeterminate()
     })
-}, {
-    immediate: true
 })
 
 watch(isExpend, (val) => {
@@ -185,11 +188,12 @@ watch(isExpend, (val) => {
     }
 })
 
+watch(() => props.defaultExpandedKeys, () => {
+    handleDefaultExpend()
+})
 
-
-watch(() => props.defaultExpandedKeys, (val) => {
-
-
+watch(() => props.defaultCheckedKeys, () => {
+    handleDefaultChecked()
 })
 
 defineExpose({

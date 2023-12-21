@@ -27,7 +27,7 @@ const checked2 = ref(false)
 const table = ref(null)
 const keys = ref([])
 const defaultExpanded = ref(['2', '16', '3'])
-const defaultChecked = ref(['3','2'])
+const defaultChecked = ref(['3','2','3-5'])
 
 
 
