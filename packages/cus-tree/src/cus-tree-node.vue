@@ -52,9 +52,17 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import 'sty/mixin.scss';
 
-@include b(tree) {
+@include b('tree-node') {
     font-size: 16px;
     flex-basis: 100%;
+    &.oneLevel{
+        border: 1px solid #e5e6eb;
+        border-radius: 2px;
+        & .cus-node-title{
+            font-weight: 600;
+
+        }
+    }
 
     .new {
         width: 30px;
@@ -70,7 +78,7 @@ export default defineComponent({
 
         .icon {
             color: #868686;
-            margin-right: 10px;
+            margin:0 12px;
             transition: transform .2s linear;
 
             &.expanded {
