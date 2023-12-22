@@ -1,24 +1,33 @@
 <template>
   <div>
-    <CusTree :show-checkbox="showCheckbox" :line-num="lineNum"></CusTree>
+    <cus-tree :data="data" :props="props" :show-checkbox="showCheckbox" :line-num="lineNum"></cus-tree>
   </div>
 </template>
 
 <script>
-import { defineComponent,ref } from '@vue/composition-api'
+import { defineComponent, ref } from '@vue/composition-api'
 import CusTree from 'pkg/cus-tree'
+import treeData from '@/params.js'
 
 export default defineComponent({
   components: {
-    CusTree
+    'cus-tree': CusTree
   },
-  setup(){
+  setup() {
     const showCheckbox = ref(true)
-    const lineNum = ref(3)
+    const lineNum = ref(4)
+    const data = ref(treeData.data.menuDTOList)
+    console.log(data.value)
+    const props = ref({
+      label: 'name',
+      children: 'childList'
+    })
 
     return {
       showCheckbox,
-      lineNum
+      lineNum,
+      data,
+      props
     }
   }
 

@@ -24,6 +24,12 @@ export default {
                     "name": "账务及存款查询",
                     "level": "02",
                     "type": "1",
+                    "childList":[{
+                        "id":"3-1-1",
+                        "name":"财务报表",
+                        "level":"03",
+                        "type":"1",
+                    }]
                 }, {
                     "id": "3-6",
                     "name": "询证函管理",

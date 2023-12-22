@@ -1,19 +1,24 @@
 <template>
-    <div :class="{ 'cus-tree-node': true, 'oneLevel': true }">
-        <div @click="handleExpandClick" class="cus-node-title">
-            <!-- <el-checkbox v-if="showCheckbox" v-model="node.checked" :indeterminate="node.indeterminate"
-                :disabled="!!node.disabled" @click.native.stop @change="handleCheckChange"></el-checkbox> -->
-            <i :class="{ 'icon': true, 'el-icon-caret-right': true, 'expanded': expanded }"></i>
-            <el-checkbox v-if="showCheckbox" @click.native.stop></el-checkbox>
-            <span class="title">父节点</span>
+    <div :class="{
+        'cus-tree-node': true,
+        'oneLevel': node.level === 1,
+        'childLevel': node.level !== 1 && !node.isLeaf,
+        'isLeaf': node.isLeaf,
+        'boderBottom': expanded
+    }" :style="leafStyle">
+        <div @click="handleExpandClick" :class="{ 'cus-node-title': true, 'boderBottom': expanded }" :style="indentStyle">
+            <i v-if="!node.isLeaf" :class="{ 'icon': true, 'el-icon-caret-right': true, 'expanded': expanded }"></i>
+            <i class="bot" v-else></i>
+            <el-checkbox v-if="showCheckbox" v-model="node.checked" :indeterminate="node.indeterminate"
+                @change="handleCheckChange" :disabled="!!node.disabled" @click.native.stop></el-checkbox>
+            <span @click="handleClick" class="title">{{ node.label }}</span>
         </div>
         <div class="cus-node-content">
             <collapse-transition>
                 <div class="content-container" v-show="expanded">
                     <div>
-                        子节的
-                        <!-- <cus-tree-node :line-num="lineNum" :show-checkbox="showCheckbox" :node="child"
-                            v-for="(child, index) in node.childNodes" :key="getKey(child)" :index="index"></cus-tree-node> -->
+                        <cus-tree-node :line-num="lineNum" :show-checkbox="showCheckbox" :node="child"
+                            v-for="(child, index) in node.childNodes" :key="getKey(child)" :index="index"></cus-tree-node>
                     </div>
                 </div>
             </collapse-transition>
@@ -26,11 +31,15 @@ import { defineComponent } from '@vue/composition-api'
 import CollapseTransition from '@/utils/collapse-transition.js'
 import { useTreeNodeCom } from './tree-node.js'
 export default defineComponent({
-    inject: ['tree'],
+    name: 'cus-tree-node',
     components: {
         CollapseTransition
     },
     props: {
+        node: {
+            type: Object
+        },
+        index: Number,
         lineNum: {
             type: Number,
             default: 3
@@ -51,34 +60,68 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import 'sty/mixin.scss';
+$borderColor: #e5e6eb;
+$bgColor: #f7f8fa;
+$fontColor: #1d2129;
+$leafColor: #415969;
+$newColor: #ed3c2f;
+
+.boderBottom {
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-color: $borderColor;
+}
+
 
 @include b('tree-node') {
-    font-size: 16px;
     flex-basis: 100%;
-    &.oneLevel{
-        border: 1px solid #e5e6eb;
-        border-radius: 2px;
-        & .cus-node-title{
-            font-weight: 600;
+    color: $leafColor;
+    box-sizing: border-box;
 
+
+
+    &.oneLevel {
+        color: $fontColor ;
+        @extend .boderBottom;
+        // border-bottom: 1px solid $borderColor;
+
+        &>.cus-node-title {
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        &:last-of-type {
+            border-bottom: none
         }
     }
 
-    .new {
-        width: 30px;
-        margin-left: 7px;
+    &.childLevel {
+        &>.cus-node-title {
+            @extend .boderBottom
+        }
     }
+
+    &.isLeaf {}
 
     .cus-node-title {
         height: 40px;
         display: flex;
         align-items: center;
-        cursor: pointer;
         user-select: none;
+        border-bottom: 1px solid transparent;
+        transition: border-bottom-color .3s linear;
+
+        .bot {
+            width: 34px
+        }
+
+        &.boderBottom {
+            @extend .boderBottom;
+        }
 
         .icon {
             color: #868686;
-            margin:0 12px;
+            margin: 0 10px;
             transition: transform .2s linear;
 
             &.expanded {
@@ -89,15 +132,19 @@ export default defineComponent({
         .title {
             margin: 0 10px;
             user-select: none;
+            cursor: pointer;
         }
     }
 
     .cus-node-content {
         .content-container {
+            will-change: height;
+
             &>div {
                 display: flex;
                 flex-wrap: wrap;
-
+                padding: 10px 0;
+                background: $bgColor;
             }
         }
     }
