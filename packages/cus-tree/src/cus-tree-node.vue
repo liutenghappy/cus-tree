@@ -8,7 +8,7 @@
         'is-expand': expanded,
         'read-only': readOnly
     }" :style="[leafStyle]">
-        <div @click="handleExpandClick" class="cus-node-title" :style="[indentStyle, childStyle]">
+        <div @click="handleExpandClick" class="cus-node-title" :style="[indentStyle]">
             <i v-if="(!readOnly && !node.isLeaf) || (readOnly && node.level === 1)"
                 :class="{ 'icon': true, 'el-icon-caret-right': true, 'expanded': expanded }"></i>
             <i class="bot" v-else></i>
@@ -134,6 +134,14 @@ $newColor: #ed3c2f;
             }
         }
 
+    }
+
+    &.level-2 {
+        &:last-of-type:not(.is-expand) {
+            &>.cus-node-title {
+                border-bottom-color: transparent
+            }
+        }
     }
 
 

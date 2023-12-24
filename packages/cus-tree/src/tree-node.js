@@ -55,14 +55,6 @@ function useNodeStyle(props, tree, expanded) {
         }
     })
 
-    const childStyle = computed(() => {
-        const nodes = props.node.parentNode.childNodes;
-        if (props.node.level === 2 && props.index === nodes.length - 1 && !expanded.value) {
-            return {
-                'border-bottom-color': 'transparent',
-            }
-        }
-    })
 
     //按层级缩进
     const indentStyle = computed(() => {
@@ -101,7 +93,6 @@ function useNodeStyle(props, tree, expanded) {
 
     return {
         leafStyle,
-        childStyle,
         indentStyle
     }
 }
