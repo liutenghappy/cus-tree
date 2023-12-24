@@ -1,7 +1,8 @@
 <template>
     <div class="cus-tree">
-        <cus-tree-node :line-num="lineNum" :show-checkbox="showCheckbox" v-for="(child, index) of root?.childNodes"
-            :node="child" :index="index" :key="child[nodeKey]"></cus-tree-node>
+        <cus-tree-node :line-num="lineNum" :readOnly="readOnly" :show-checkbox="!readOnly"
+            v-for="(child, index) of root?.childNodes" :node="child" :index="index" :key="child[nodeKey]">
+        </cus-tree-node>
     </div>
 </template>
 
@@ -48,16 +49,16 @@ export default defineComponent({
             type: Number,
             default: 3
         },
-        //是否可选
-        showCheckbox: {
-            type: Boolean,
-            default: true
-        },
         //子节点的缩进
         indent: {
             type: Number,
             default: 24
         },
+        //只读
+        readOnly: {
+            type: Boolean,
+            default: false
+        }
     },
     setup(props) {
         return {

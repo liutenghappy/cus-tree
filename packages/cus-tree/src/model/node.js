@@ -62,7 +62,6 @@ const getPropertyFromData = function (node, prop) {
 export default class Node {
     constructor(options) {
         this.id = nodeIdSeed++;
-        this.text = null;
         this.level = 0;
         this.checked = false;
         this.indeterminate = false;
@@ -104,6 +103,8 @@ export default class Node {
         if (!this.data) return;
         const defaultExpandedKeys = store.defaultExpandedKeys;
         const key = store.key;
+
+        //默认展开
         if (key && defaultExpandedKeys && defaultExpandedKeys.indexOf(this.key) !== -1) {
             this.expand(null, store.autoExpandParent);
         }
@@ -162,9 +163,15 @@ export default class Node {
             child = new Node(child);
         }
 
-        this.store.count += 1
+        this.store.count += 1;
+
+        const key = this.key;
+        if (key != undefined) {
+            this.store.keys.push(key)
+        }
 
         child.level = this.level + 1;
+
 
         if (typeof index === 'undefined' || index < 0) {
             this.childNodes.push(child);
@@ -215,21 +222,32 @@ export default class Node {
     expand(callback, expandParent) {
         const done = () => {
             //是否展开父节点
-            if (expandParent) {
-                let parent = this.parentNode;
-                while (parent.level > 0) {
+            this.expanded = true;
+
+            function rdone(node) {
+                let parent = node.parentNode
+                if (parent.level > 0) {
                     parent.expanded = true;
-                    parent = parent.parentNode;
+                    window.requestAnimationFrame(() => rdone(parent))
                 }
             }
-            this.expanded = true;
+
+            if (expandParent) {
+                window.requestAnimationFrame(() => rdone(this))
+                // let parent = this.parentNode;
+                // while (parent.level > 0) {
+                //     parent.expanded = true;
+                //     parent = parent.parentNode;
+                // }
+            }
             if (callback) callback();
         };
         done();
     }
 
     //折叠
-    collapse() {
+    collapse(callback) {
         this.expanded = false;
+        if (callback) callback()
     }
 }

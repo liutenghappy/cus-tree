@@ -21,6 +21,9 @@ export default class TreeStore {
         //新增节点
         this.newNodes = []
 
+        //所有key的集合
+        this.keys = []
+
         this.root = new Node({
             data: this.data,
             store: this
@@ -158,7 +161,7 @@ export default class TreeStore {
     }
 
     //设置选中的节点(value为true选中，为false不选中)
-    setCheckedKeys(keys, value = true, leafOnly = false) {
+    setKeys(keys, value = true, leafOnly = false) {
         this.defaultCheckedKeys = keys;
         const key = this.key;
         const checkedKeys = {};
@@ -166,7 +169,24 @@ export default class TreeStore {
             checkedKeys[key] = true;
         });
 
-        this._setCheckedKeys(key, value, leafOnly, checkedKeys);
+        this._setKeys(key, value, leafOnly, checkedKeys);
+    }
+
+    //设置展开/折叠 
+    setExpandedKeys(keys, isExpand = true) {
+        keys = keys || [];
+        //防止高度突变，导致动画卡顿
+        keys.sort((a, b) => b - a)
+        keys.forEach((key) => {
+            const node = this.getNode(key);
+            if (node && !node.isLeaf) {
+                if (isExpand) {
+                    node.expand(null, this.autoExpandParent);
+                } else {
+                    node.collapse(null)
+                }
+            }
+        });
     }
 
     //获取所有节点
@@ -181,7 +201,7 @@ export default class TreeStore {
         return allNodes;
     }
 
-    _setCheckedKeys(key, value, leafOnly = false, checkedKeys) {
+    _setKeys(key, value, leafOnly = false, checkedKeys) {
         const allNodes = this._getAllNodes().sort((a, b) => b.level - a.level);
         const cache = Object.create(null);
         const keys = Object.keys(checkedKeys);

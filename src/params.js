@@ -12,7 +12,8 @@ export default {
                         "id": "2-1",
                         "name": "开具发票",
                         "level": "02",
-                        "type": "1",
+                        "type": "Q",
+                        "disabled":true
                     }
                 ]
             }, {
@@ -23,27 +24,89 @@ export default {
                     "id": "3-1",
                     "name": "账务及存款查询",
                     "level": "02",
-                    "type": "1",
-                    "childList":[{
-                        "id":"3-1-1",
-                        "name":"财务报表",
-                        "level":"03",
-                        "type":"1",
-                    }]
-                }, {
-                    "id": "3-6",
-                    "name": "询证函管理",
-                    "level": "02",
-                    "disabled": true,
-                    "type": "2",
+                    "type": "Q",
+                    "childList": [{
+                        "id": "3-1-1",
+                        "name": "财务报表",
+                        "level": "03",
+                        "type": "Q",
+                        "childList": [{
+                            "id": "3-1-1-1",
+                            "name": "财务报表",
+                            "level": "03",
+                            "type": "Q",
+                            "childList": [{
+                                "id": "3-1-1-1-1",
+                                "name": "财务报表",
+                                "level": "03",
+                                "type": "Q",
 
-                }, {
-                    "id": "3-7",
-                    "name": "询证函查询",
-                    "level": "02",
-                    "type": "2",
 
-                }]
+                            },
+                            {
+                                "id": "3-1-1-1-2",
+                                "name": "存款报表",
+                                "level": "03",
+                                "type": "R",
+                            }]
+
+                        },
+                        {
+                            "id": "3-1-1-2",
+                            "name": "财务报表",
+                            "level": "03",
+                            "type": "Q",
+                            "childList": [{
+                                "id": "3-1-1-2-1",
+                                "name": "财务报表",
+                                "level": "03",
+                                "type": "Q",
+
+
+                            },
+                            {
+                                "id": "3-1-1-2-2",
+                                "name": "存款报表",
+                                "level": "03",
+                                "type": "R",
+                            }]
+
+                        }
+                        ]
+
+                    },
+                    ]
+                }, {
+                    "id": "18",
+                    "name": "存款",
+                    "level": "01",
+                    "childList": [
+                        {
+                            "id": "18-1",
+                            "name": "协定存款签约/解约",
+                            "level": "02"
+                        }, {
+                            "id": "18-2",
+                            "name": "存款存入/支取",
+                            "level": "02"
+                        }
+                    ]
+                },
+                    // {
+                    //     "id": "3-6",
+                    //     "name": "询证函管理",
+                    //     "level": "02",
+                    //     "disabled": true,
+                    //     "type": "2",
+
+                    // }, {
+                    //     "id": "3-7",
+                    //     "name": "询证函查询",
+                    //     "level": "02",
+                    //     "type": "2",
+
+                    // }
+                ]
             }, {
                 "id": "16",
                 "name": "存款",
@@ -52,11 +115,12 @@ export default {
                     {
                         "id": "3-5",
                         "name": "协定存款签约/解约",
-                        "level": "02"
+                        "level": "02",
                     }, {
                         "id": "16-2",
                         "name": "存款存入/支取",
-                        "level": "02"
+                        "level": "02",
+                        'new':true
                     }
                 ]
             }, {
@@ -69,13 +133,14 @@ export default {
                         "name": "转账汇款",
                         "level": "02",
                         "new": true,
-                        "type": "2",
+                        "type": "O",
+                        'new':true
 
                     }, {
                         "id": "4-2",
                         "name": "发薪管理",
                         "level": "02",
-                        "type": "3",
+                        "type": "O",
 
                     }
                 ]
@@ -95,7 +160,7 @@ export default {
                         "id": "5-2",
                         "name": "还款",
                         "level": "02",
-                        "type": "3",
+                        "type": "O",
 
                     }, {
                         "id": "5-3",
