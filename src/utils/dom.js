@@ -1,3 +1,17 @@
+const trim = function (string) {
+    return (string || '').replace(/^[\s\uFEFF]+|[\s\uFEFF]+$/g, '');
+};
+
+export function hasClass(el, cls) {
+    if (!el || !cls) return false;
+    if (cls.indexOf(' ') !== -1) throw new Error('className should not contain space.');
+    if (el.classList) {
+        return el.classList.contains(cls);
+    } else {
+        return (' ' + el.className + ' ').indexOf(' ' + cls + ' ') > -1;
+    }
+};
+
 export function addClass(el, cls) {
     if (!el) return;
     var curClass = el.className;

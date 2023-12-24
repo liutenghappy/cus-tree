@@ -15,7 +15,6 @@
             <el-checkbox v-if="showCheckbox" v-model="node.checked" :indeterminate="node.indeterminate"
                 @change="handleCheckChange" :disabled="!!node.disabled" @click.native.stop></el-checkbox>
             <div @click="handleClick" :class="{ 'title': true, 'disabled': node.disabled }">
-                <!-- <slot>{{ node.label }}</slot> -->
                 <node-content :node="node"></node-content>
             </div>
         </div>
@@ -64,7 +63,6 @@ export default defineComponent({
         }
     },
     setup(props) {
-
         return {
             ...useTreeNodeCom(props),
         };
