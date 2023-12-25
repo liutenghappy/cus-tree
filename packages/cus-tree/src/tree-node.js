@@ -6,9 +6,11 @@ import { getNodeKey } from './model/utils'
 function useChecked(props, tree) {
     const oldChecked = ref(false)
     const oldIndeterminate = ref(false)
+    const checked = ref(false)
     //处理选中事件
     function handleCheckChange(value, ev) {
         props.node.setChecked(ev.target.checked, true);
+        checked.value = props.node.checked
         nextTick(() => {
             const store = props.node.store;
             tree.$emit('check', props.node.data, {
@@ -20,12 +22,13 @@ function useChecked(props, tree) {
         })
     }
     //节点选中状态发生变化时向组件外抛出事件
-    function handleSelectChange(checked, indeterminate) {
-        if (oldChecked.value !== checked && oldIndeterminate.value !== indeterminate) {
-            tree.$emit('check-change', props.node.data, checked, indeterminate);
+    function handleSelectChange(onchecked, onindeterminate) {
+        if (oldChecked.value !== onchecked && oldIndeterminate.value !== onindeterminate) {
+            tree.$emit('check-change', props.node.data, onchecked, onindeterminate);
         }
-        oldChecked.value = checked;
-        oldIndeterminate.value = indeterminate;
+        checked.value = onchecked;
+        oldChecked.value = onchecked;
+        oldIndeterminate.value = onindeterminate;
     }
 
     watch(() => props.node.checked, (val) => {
@@ -33,6 +36,7 @@ function useChecked(props, tree) {
     })
 
     return {
+        checked,
         oldChecked,
         oldIndeterminate,
         handleCheckChange
@@ -40,7 +44,7 @@ function useChecked(props, tree) {
 }
 
 //节点样式
-function useNodeStyle(props, tree, expanded) {
+function useNodeStyle(props, tree) {
     //叶子节点样式
     const leafStyle = computed(() => {
         const base = Math.floor(100 / props.lineNum);
@@ -147,12 +151,15 @@ export function useTreeNodeCom(props) {
     const tree = inject('tree')
     const expanded = ref(false)
     const childNodeRendered = ref(false)
-    const { handleCheckChange } = useChecked(props, tree)
+    const { handleCheckChange, checked } = useChecked(props, tree)
 
     onMounted(() => {
         if (props.node.expanded) {
             expanded.value = true;
             childNodeRendered.value = true
+        }
+        if (props.node.checked) {
+            checked.value = true
         }
     })
 
@@ -191,11 +198,12 @@ export function useTreeNodeCom(props) {
 
     return {
         expanded,
+        checked,
         childNodeRendered,
         getKey,
         handleClick,
         handleCheckChange,
-        ...useNodeStyle(props, tree, expanded),
+        ...useNodeStyle(props, tree),
         ...useExpanded(props, tree, expanded, childNodeRendered),
         // ...useNodeContent(props, tree)
     }

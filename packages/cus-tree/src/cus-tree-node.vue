@@ -12,7 +12,7 @@
             <i v-if="(!readOnly && !node.isLeaf) || (readOnly && node.level === 1)"
                 :class="{ 'icon': true, 'el-icon-caret-right': true, 'expanded': expanded }"></i>
             <i class="bot" v-else></i>
-            <el-checkbox v-if="showCheckbox" v-model="node.checked" :indeterminate="node.indeterminate"
+            <el-checkbox v-if="showCheckbox" v-model="checked" :indeterminate="node.indeterminate"
                 @change="handleCheckChange" :disabled="!!node.disabled" @click.native.stop></el-checkbox>
             <div @click="handleClick" :class="{ 'title': true, 'disabled': node.disabled }">
                 <node-content :node="node"></node-content>
@@ -35,8 +35,7 @@
 <script>
 import { defineComponent } from "@vue/composition-api";
 import CollapseTransition from "@/utils/collapse-transition.js";
-import { useTreeNodeCom } from "./tree-node.js";
-import { nodeContent } from './tree-node.js';
+import { useTreeNodeCom, nodeContent } from "./tree-node.js";
 
 export default defineComponent({
     name: "cus-tree-node",

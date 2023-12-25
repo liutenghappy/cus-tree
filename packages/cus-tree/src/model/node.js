@@ -216,6 +216,7 @@ export default class Node {
         if (!recursion) {
             reInitChecked(parent);
         }
+        
     }
 
     //展开
