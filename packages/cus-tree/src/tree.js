@@ -68,7 +68,7 @@ export function useTreeWrap(props) {
     provide('tree', tree.proxy)
 
     const store = ref({})
-    const root = ref(null)
+    const root = ref({ childNodes: [] })
 
     onMounted(() => {
         store.value = new TreeStore({

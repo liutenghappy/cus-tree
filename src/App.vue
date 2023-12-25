@@ -19,8 +19,17 @@
     <cus-tree ref="tree" :readOnly="readOnly" :defaultExpandedKeys="defaultExpanded" :defaultCheckedKeys="defaultChecked"
       node-key="id" :data="data" :props="props" :show-checkbox="showCheckbox" :line-num="lineNum">
       <template #default="{ node }">
-        <span>{{ node.label }}</span>
-        <i class="new" v-if="node.data.new">NEW</i>
+        <template v-if="node.data.disabled">
+          <el-popover placement="top" title="" width="150" trigger="hover" content="该菜单权限已被禁止">
+            <span slot="reference">{{ node.label }}</span>
+            <i class="new" v-if="node.data.new">NEW</i>
+          </el-popover>
+        </template>
+
+        <template v-else>
+          <span>{{ node.label }}</span>
+          <i class="new" v-if="node.data.new">NEW</i>
+        </template>
       </template>
     </cus-tree>
   </div>

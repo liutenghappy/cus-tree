@@ -1,7 +1,7 @@
 <template>
     <div class="cus-tree">
         <cus-tree-node :line-num="lineNum" :readOnly="readOnly" :show-checkbox="!readOnly"
-            v-for="(child, index) of root?.childNodes" :node="child" :index="index" :key="child[nodeKey]">
+            v-for="(child, index) of root.childNodes" :node="child" :index="index" :key="child[nodeKey]">
         </cus-tree-node>
     </div>
 </template>
