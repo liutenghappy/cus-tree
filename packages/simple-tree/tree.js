@@ -95,22 +95,6 @@ class TreeStore {
     getCheckedKeys(leafOnly = false) {
         return this.getCheckedNodes(leafOnly).map((data) => (data || {})[this.key]);
     }
-    //设置展开/折叠 
-    setExpandedKeys(keys, isExpand = true) {
-        keys = keys || [];
-        //防止高度突变，导致动画卡顿
-        keys.sort((a, b) => b - a)
-        keys.forEach((key) => {
-            const node = this.getNode(key);
-            if (node && !node.isLeaf) {
-                if (isExpand) {
-                    node.expand();
-                } else {
-                    node.collapse()
-                }
-            }
-        });
-    }
     //获取所有节点
     _getAllNodes() {
         const allNodes = [];
@@ -134,15 +118,10 @@ function useTreeMethods(store) {
     function getAllNodes() {
         return store.value._getAllNodes()
     }
-    //设置展开/折叠 
-    function setExpandedKeys(keys, isExpand = true) {
-        store.value.setExpandedKeys(keys, isExpand)
-    }
 
     return {
         getCheckedKeys,
         getAllNodes,
-        setExpandedKeys,
     }
 
 }
