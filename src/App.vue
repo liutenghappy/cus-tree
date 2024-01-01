@@ -7,17 +7,15 @@
     </el-checkbox-group>
 
     <div class="checks">
-      <el-checkbox @change="checkAll" v-model="checked1">全选所有菜单</el-checkbox>
       <el-checkbox @change="checkNew" v-model="checked2">全选新增菜单</el-checkbox>
-      <el-checkbox @change="setExpandedAll" v-model="expand">全展开</el-checkbox>
-      <el-checkbox v-model="readOnly">只读</el-checkbox>
+      <el-checkbox @change="checkAll" v-model="checked1">全选</el-checkbox>
+
       <div>
         <button @click="getKeys">获取选中节点的key</button>
         <span>{{ keys }}</span>
       </div>
     </div>
-    <cus-tree ref="tree" :readOnly="readOnly" :defaultExpandedKeys="defaultExpanded" :defaultCheckedKeys="defaultChecked"
-      node-key="id" :data="data" :props="props" :show-checkbox="showCheckbox" :line-num="lineNum">
+    <cus-tree ref="tree" node-key="id" :data="data">
       <template #default="{ node }">
         <span>{{ node.label }}</span>
         <i class="new" v-if="node.data.new">NEW</i>
@@ -28,7 +26,7 @@
 
 <script>
 import { defineComponent, ref, watch } from '@vue/composition-api'
-import CusTree from 'pkg/cus-tree'
+import CusTree from 'pkg/simple-tree/tree.vue'
 import treeData from '@/params.js'
 
 export default defineComponent({
@@ -36,41 +34,30 @@ export default defineComponent({
     'cus-tree': CusTree
   },
   setup() {
-    const showCheckbox = ref(true)
-    const lineNum = ref(4)
     const data = ref(treeData.data.menuDTOList)
-    const defaultExpanded = ref([])
-    const defaultChecked = ref([])
-    const props = ref({
-      label: 'name',
-      children: 'childList'
-    })
     const tree = ref(null)
     const checkList = ref([])
     const checked1 = ref(false)
     const checked2 = ref(false)
     const keys = ref([])
-    const expand = ref(false)
-    const readOnly = ref(false)
-
-    function checkAll(val) {
-      tree.value.setAll(val)
-    }
 
     function checkNew(val) {
+      console.log(val)
       const nodes = tree.value.getAllNodes()
-      const result = nodes.filter(n => {
+      nodes.filter(n => {
         return n.data.new
-      }).map(n => n.key);
-      tree.value.setKeys(result, val)
+      }).map(n => {
+        n.setChecked(val)
+        if (val) {
+          n.expand()
+        } else {
+          n.parentNode.collapse()
+        }
+      });
     }
 
     function getKeys() {
       keys.value = tree.value.getCheckedKeys()
-    }
-
-    function setExpandedAll(val) {
-      tree.value.setExpandedAll(val)
     }
 
     //查询/经办/批准
@@ -78,16 +65,26 @@ export default defineComponent({
       const nodes = tree.value.getAllNodes()
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i]
-        const v = val.includes(node.data.type)
-
+        let types = typeof node.data.type === 'string' ?
+          [node.data.type] : Array.isArray(node.data.type) ?
+            node.data.type : [];
+        const v = types.some(t => val.includes(t))
         if (v) {
-          node.expand(null, true);
+          node.expand();
         } else {
-          node.collapse(null);
+          node.collapse();
         }
-        node.setChecked(v, true)
+        node.setChecked(v)
 
       }
+    }
+
+
+    function checkAll(val) {
+      const nodes = tree.value.getAllNodes()
+      nodes.forEach(node => {
+        node.setChecked(val)
+      });
     }
 
 
@@ -97,23 +94,15 @@ export default defineComponent({
     })
 
     return {
-      defaultChecked,
-      defaultExpanded,
-      showCheckbox,
-      lineNum,
       data,
-      props,
       checkList,
       checked1,
       checked2,
       tree,
       keys,
-      expand,
-      checkAll,
       checkNew,
       getKeys,
-      setExpandedAll,
-      readOnly,
+      checkAll
     }
   }
 
