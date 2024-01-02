@@ -35,7 +35,7 @@
 <script>
 import { defineComponent } from "@vue/composition-api";
 import CollapseTransition from "@/utils/collapse-transition.js";
-import { useTreeNodeCom, nodeContent } from "./tree-node.js";
+import { useTreeNodeCom,nodeContent } from "./node.js";
 
 export default defineComponent({
     name: "cus-tree-node",

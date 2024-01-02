@@ -9,7 +9,7 @@
 <script>
 import { defineComponent } from '@vue/composition-api'
 import { useTreeWrap } from './tree.js'
-import CusTreeNode from './cus-tree-node.vue'
+import CusTreeNode from './node.vue'
 export default defineComponent({
     name: 'cus-tree',
     components: {
@@ -22,28 +22,12 @@ export default defineComponent({
         },
         //每个树节点用来作为唯一标识的属性，整棵树应该是唯一的
         nodeKey: String,
-        //当前选中的节点
-        currentNodeKey: [String, Number],
         //默认勾选的节点的 key 的数组
         defaultCheckedKeys: Array,
         //默认展开的节点的 key 的数组
         defaultExpandedKeys: Array,
-        //展开子节点的时候是否自动展开父节点
-        autoExpandParent: {
-            type: Boolean,
-            default: true
-        },
         //是否默认展开所有节点
         defaultExpandAll: Boolean,
-        props: {
-            default() {
-                return {
-                    children: 'children',
-                    label: 'label',
-                    disabled: 'disabled'
-                };
-            }
-        },
         //叶子节点横排数
         lineNum: {
             type: Number,

@@ -12,8 +12,8 @@ export default {
                         "id": "2-1",
                         "name": "开具发票",
                         "level": "02",
-                        "type": "Q",
-                        "disabled":true
+                        "type": ["Q", 'R'],
+                        "disabled": true
                     }
                 ]
             }, {
@@ -34,7 +34,7 @@ export default {
                             "id": "3-1-1-1",
                             "name": "财务报表",
                             "level": "03",
-                            "type": "Q",
+                            "type":["Q", 'R'],
                             "childList": [{
                                 "id": "3-1-1-1-1",
                                 "name": "财务报表",
@@ -60,7 +60,7 @@ export default {
                                 "id": "3-1-1-2-1",
                                 "name": "财务报表",
                                 "level": "03",
-                                "type": "Q",
+                                "type": ["Q", 'R'],
 
 
                             },
@@ -68,7 +68,7 @@ export default {
                                 "id": "3-1-1-2-2",
                                 "name": "存款报表",
                                 "level": "03",
-                                "type": "R",
+                                "type": ["Q", 'R'],
                             }]
 
                         }
@@ -120,7 +120,7 @@ export default {
                         "id": "16-2",
                         "name": "存款存入/支取",
                         "level": "02",
-                        'new':true
+                        'new': true
                     }
                 ]
             }, {
@@ -133,8 +133,8 @@ export default {
                         "name": "转账汇款",
                         "level": "02",
                         "new": true,
-                        "type": "O",
-                        'new':true
+                        "type": ["Q", 'R',"O"],
+
 
                     }, {
                         "id": "4-2",
