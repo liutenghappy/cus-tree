@@ -208,6 +208,7 @@ export class Node {
                     window.requestAnimationFrame(() => rdone(parent))
                 }
             }
+
             window.requestAnimationFrame(() => rdone(this))
         };
         done();

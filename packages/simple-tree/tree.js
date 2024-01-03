@@ -91,6 +91,17 @@ class TreeStore {
         return checkedNodes;
     }
 
+
+    setData(newVal) {
+        const instanceChanged = newVal !== this.root.data;
+        if (instanceChanged) {
+            this.root.setData(newVal);
+            this._initDefaultCheckedNodes();
+        } else {
+            this.root.updateChildren();
+        }
+    }
+
     //获取选中节点的key
     getCheckedKeys(leafOnly = false) {
         return this.getCheckedNodes(leafOnly).map((data) => (data || {})[this.key]);

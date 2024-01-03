@@ -9,13 +9,13 @@
     <div class="checks">
       <el-checkbox @change="checkNew" v-model="checked2">全选新增菜单</el-checkbox>
       <el-checkbox @change="checkAll" v-model="checked1">全选</el-checkbox>
-
+      <el-checkbox v-model="readOnly">只读</el-checkbox>
       <div>
         <button @click="getKeys">获取选中节点的key</button>
         <span>{{ keys }}</span>
       </div>
     </div>
-    <cus-tree ref="tree" node-key="id" :data="data">
+    <cus-tree ref="tree" node-key="id" :data="data" :readOnly="readOnly">
       <template #default="{ node }">
         <template v-if="node.data.disabled">
           <el-popover placement="top" title="" width="150" trigger="hover" content="该菜单权限已被禁止">
@@ -49,6 +49,7 @@ export default defineComponent({
     const checked1 = ref(false)
     const checked2 = ref(false)
     const keys = ref([])
+    const readOnly = ref(false)
 
     function checkNew(val) {
       console.log(val)
@@ -84,25 +85,30 @@ export default defineComponent({
           node.collapse();
         }
         node.setChecked(v)
-
       }
     }
 
 
     function checkAll(val) {
-      const nodes = tree.value.getAllNodes()
+      const nodes = tree.value.getAllNodes().sort((a, b) => b.id - a.id);
       nodes.forEach(node => {
         node.setChecked(val)
+        if (val) {
+          window.requestAnimationFrame(() => {
+            node.expanded = true
+          })
+        } else {
+          node.collapse();
+        }
       });
     }
-
-
 
     watch(checkList, (val) => {
       setType(val)
     })
 
     return {
+      readOnly,
       data,
       checkList,
       checked1,
@@ -114,7 +120,6 @@ export default defineComponent({
       checkAll
     }
   }
-
 })
 </script>
 
