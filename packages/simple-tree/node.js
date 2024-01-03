@@ -222,16 +222,24 @@ export class Node {
 
 
 //节点选中相关逻辑
-function useChecked(props) {
+function useChecked(props, tree) {
     //处理选中事件
     const checked = ref(false)
+
     function handleCheckChange(value, ev) {
         props.node.setChecked(ev.target.checked);
         checked.value = props.node.checked
+
+        nextTick(() => {
+            const store = tree.store;
+            tree.$emit('check', store.getCheckedKeys());
+        });
     }
+
     watch(() => props.node.checked, (val) => {
-        checked.value = val;
+        checked.value = val
     })
+
     return {
         checked,
         handleCheckChange
@@ -343,7 +351,7 @@ export function useTreeNodeCom(props) {
     const expanded = ref(false)
     const childNodeRendered = ref(false)
 
-    const { handleCheckChange, checked } = useChecked(props)
+    const { handleCheckChange, checked } = useChecked(props, tree)
 
     onMounted(() => {
         if (props.node.expanded) {

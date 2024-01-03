@@ -8,14 +8,14 @@
 
     <div class="checks">
       <el-checkbox @change="checkNew" v-model="checked2">全选新增菜单</el-checkbox>
-      <el-checkbox @change="checkAll" v-model="checked1">全选</el-checkbox>
+      <el-checkbox @change="checkAll" :indeterminate="isIndeterminate" v-model="checked1">全选</el-checkbox>
       <el-checkbox v-model="readOnly">只读</el-checkbox>
       <div>
         <button @click="getKeys">获取选中节点的key</button>
         <span>{{ keys }}</span>
       </div>
     </div>
-    <cus-tree ref="tree" node-key="id" :data="data" :readOnly="readOnly">
+    <cus-tree @check="checkChange" ref="tree" node-key="id" :data="data" :readOnly="readOnly">
       <template #default="{ node }">
         <template v-if="node.data.disabled">
           <el-popover placement="top" title="" width="150" trigger="hover" content="该菜单权限已被禁止">
@@ -50,6 +50,7 @@ export default defineComponent({
     const checked2 = ref(false)
     const keys = ref([])
     const readOnly = ref(false)
+    const isIndeterminate = ref(false)
 
     function checkNew(val) {
       console.log(val)
@@ -91,6 +92,7 @@ export default defineComponent({
 
     function checkAll(val) {
       const nodes = tree.value.getAllNodes().sort((a, b) => b.id - a.id);
+      const len = nodes.length;
       nodes.forEach(node => {
         node.setChecked(val)
         if (val) {
@@ -100,7 +102,24 @@ export default defineComponent({
         } else {
           node.collapse();
         }
-      });
+      })
+
+      const checkedLen = nodes.filter(n => {
+        return n.checked
+      }).length
+      checked1.value = checkedLen === len
+      isIndeterminate.value = checkedLen > 0 && checkedLen < len;
+    }
+
+    function checkChange(data) {
+      console.log(data)
+      const nodes = tree.value.getAllNodes()
+      const len = nodes.length;
+      const checkedLen = nodes.filter(n => {
+        return n.checked
+      }).length
+      checked1.value = checkedLen === len
+      isIndeterminate.value = checkedLen > 0 && checkedLen < len;
     }
 
     watch(checkList, (val) => {
@@ -117,7 +136,9 @@ export default defineComponent({
       keys,
       checkNew,
       getKeys,
-      checkAll
+      checkAll,
+      checkChange,
+      isIndeterminate
     }
   }
 })

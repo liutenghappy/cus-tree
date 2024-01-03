@@ -22,6 +22,7 @@ class TreeStore {
             store: this
         });
 
+
         this._initDefaultCheckedNodes();
     }
 
@@ -91,17 +92,6 @@ class TreeStore {
         return checkedNodes;
     }
 
-
-    setData(newVal) {
-        const instanceChanged = newVal !== this.root.data;
-        if (instanceChanged) {
-            this.root.setData(newVal);
-            this._initDefaultCheckedNodes();
-        } else {
-            this.root.updateChildren();
-        }
-    }
-
     //获取选中节点的key
     getCheckedKeys(leafOnly = false) {
         return this.getCheckedNodes(leafOnly).map((data) => (data || {})[this.key]);
@@ -161,10 +151,6 @@ export function useTreeWrap(props) {
 
     watch(() => props.defaultExpandedKeys, () => {
         store.value.setDefaultExpandedKeys(newVal);
-    })
-
-    watch(() => props.data, () => {
-        store.value.setData(newVal);
     })
 
     return {
