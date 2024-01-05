@@ -111,7 +111,7 @@ $newColor: #ed3c2f;
     &.child-level {
         cursor: pointer;
 
-        &>.cus-node-title {
+        &:not(.read-only)>.cus-node-title {
             @extend .boderBottom;
         }
     }
@@ -139,6 +139,17 @@ $newColor: #ed3c2f;
         &:last-of-type:not(.is-expand) {
             &>.cus-node-title {
                 border-bottom-color: transparent
+            }
+        }
+
+        &.read-only {
+            &:not(:last-of-type):not(.is-leaf)>.cus-node-content {
+                &::after {
+                    content: '';
+                    display: block;
+                    @extend .boderBottom;
+                    margin-left: 58px;
+                }
             }
         }
     }
