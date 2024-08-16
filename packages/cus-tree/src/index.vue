@@ -21,7 +21,10 @@ export default defineComponent({
             default: () => []
         },
         //每个树节点用来作为唯一标识的属性，整棵树应该是唯一的
-        nodeKey: String,
+        nodeKey: {
+            type: String,
+            default: 'id'
+        },
         //当前选中的节点
         currentNodeKey: [String, Number],
         //默认勾选的节点的 key 的数组
@@ -34,7 +37,10 @@ export default defineComponent({
             default: true
         },
         //是否默认展开所有节点
-        defaultExpandAll: Boolean,
+        defaultExpandAll: {
+            type: Boolean,
+            default: false
+        },
         props: {
             default() {
                 return {
